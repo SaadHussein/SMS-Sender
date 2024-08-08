@@ -22,7 +22,7 @@ const SendSMSForm = () => {
 		});
 	};
 
-	const handleSubmitForm = (e: React.FormEvent<HTMLFormElement>) => {
+	const handleSubmitForm = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
 		if (
@@ -34,6 +34,39 @@ const SendSMSForm = () => {
 			openNotification("topRight");
 		} else {
 			console.log(phoneNumber, language, message);
+			const responseResult = await fetch("http://localhost:3000/sms/send", {
+				method: "POST",
+				body: JSON.stringify({
+					mobile: phoneNumber,
+					language,
+					message,
+				}),
+				headers: {
+					"Content-Type": "application/json",
+				},
+			});
+
+			const result = await responseResult.json();
+			console.log(result);
+
+			if (result.code === "1901") {
+				api.info({
+					message: `Notification About SMS Sender Form`,
+					description: "SMS Sended Successfully.",
+					placement: "topRight",
+				});
+
+				setLanguage(0);
+				setMessage("");
+				setPhoneNumber("");
+			} else {
+				api.info({
+					message: `Notification About SMS Sender Form`,
+					description:
+						"Error While Sending SMS, Please Review The Data You Send.",
+					placement: "topRight",
+				});
+			}
 		}
 	};
 
